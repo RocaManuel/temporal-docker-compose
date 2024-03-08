@@ -48,7 +48,7 @@ services:
     networks:
       - temporal-network
     ports:
-      - 7233:7233
+      - 127.0.0.1:7000:7233
     labels:
       kompose.volume.type: configMap
     volumes:
@@ -76,7 +76,7 @@ services:
     networks:
       - temporal-network
     ports:
-      - 8080:8080
+      - 127.0.0.1:5000:8080
 networks:
   temporal-network:
     driver: bridge
