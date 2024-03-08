@@ -1,0 +1,42 @@
+resources:
+- name: cheap-docker-test
+  type: compute.v1.instance
+  properties:
+    zone: us-central1-a  # Choose a region that qualifies for the Always Free tier if using f1-micro
+    machineType: projects/mystockseguro-staging/zones/us-central1-a/machineTypes/g1-small  # Consider f1-micro for Always Free tier
+    scheduling:
+      preemptible: true
+      automaticRestart: false
+      onHostMaintenance: "TERMINATE"
+    disks:
+    - deviceName: boot
+      type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        sourceImage: projects/debian-cloud/global/images/family/debian-10
+    networkInterfaces:
+    - network: global/networks/default
+      accessConfigs:
+      - name: External NAT
+        type: ONE_TO_ONE_NAT
+    metadata:
+      items:
+      - key: startup-script
+        value: |
+          #!/bin/bash
+          # Install Docker
+          apt-get update
+          apt-get install -y apt-transport-https ca-certificates curl software-properties-common gnupg2
+          curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
+          add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
+          apt-get update
+          apt-get install -y docker-ce docker-ce-cli containerd.io
+          # Install Docker Compose
+          curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+          # Pull and run your Docker Compose application
+          cd /path/to/your/application
+          git clone https://github.com/RocaManuel/temporal-docker-compose.git
+          cd temporal-docker-compose
+          docker-compose up -d
