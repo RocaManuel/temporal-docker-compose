@@ -35,32 +35,29 @@ services:
       - postgresql
       - elasticsearch
     environment:
-      - DB=postgresql
+      - DB=postgres12
       - DB_PORT=5432
       - POSTGRES_USER=temporal
       - POSTGRES_PWD=temporal
       - POSTGRES_SEEDS=postgresql
-      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
       - ENABLE_ES=true
       - ES_SEEDS=elasticsearch
       - ES_VERSION=v7
-    image: temporalio/auto-setup:${TEMPORAL_VERSION}
+    image: ${IMAGE_REPO}/auto-setup:${IMAGE_TAG}
     networks:
       - temporal-network
     ports:
-      - "7000:7233"  # Bind port 7233 inside the container to port 7000 on all host interfaces
+      - 7233:7233
     labels:
       kompose.volume.type: configMap
-    volumes:
-      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
   temporal-admin-tools:
     container_name: temporal-admin-tools
     depends_on:
       - temporal
     environment:
-      - TEMPORAL_ADDRESS=temporal:7233
-      - TEMPORAL_CLI_ADDRESS=temporal:7233
-    image: temporalio/admin-tools:${TEMPORAL_VERSION}
+      - TEMPORAL_ADDRESS=temporal:7233 # used by temporal
+      - TEMPORAL_CLI_ADDRESS=temporal:7233 # used by tctl
+    image: ${IMAGE_REPO}/admin-tools:${IMAGE_TAG}
     networks:
       - temporal-network
     stdin_open: true
@@ -76,7 +73,7 @@ services:
     networks:
       - temporal-network
     ports:
-      - "5000:8080"  # Bind port 8080 inside the container to port 5000 on all host interfaces
+      - 8080:8080
 networks:
   temporal-network:
     driver: bridge
